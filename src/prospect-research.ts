@@ -247,27 +247,27 @@ export async function runCompanyAnalysis(query: string): Promise<CompanyAnalysis
   } catch {
     // Ignore close errors.
   }
-const analysis: CompanyAnalysis = {
-  query,
-  companyDomain,
-  compact: buildCompactPayload({
-    firmo: firmographic,
-    techno: technographic,
-    cloudSpend,
-    fai,
-    securitySpend,
-    contracts,
-    productCategories,
-    productVendors,
-    productAttributes,
-    intentTopics,
-    productInfo,
-    productReviews,
-  }),
-};
+  const analysis: CompanyAnalysis = {
+    query,
+    companyDomain,
+    compact: buildCompactPayload({
+      firmo: firmographic,
+      techno: technographic,
+      cloudSpend,
+      fai,
+      securitySpend,
+      contracts,
+      productCategories,
+      productVendors,
+      productAttributes,
+      intentTopics,
+      productInfo,
+      productReviews,
+    }),
+  };
 
-if (companyName) {
-  analysis.companyName = companyName;
-}
+  if (companyName) {
+    analysis.companyName = companyName;
+  }
 
-return analysis;
+  return analysis;
