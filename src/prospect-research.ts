@@ -177,7 +177,10 @@ async function resolveCompanyDomain(
   if (companies.length) {
     const best = pickCompany(companies, query);
     const domain = best?.domain ? normalizeDomain(best.domain) : "";
-    if (domain) return { domain, name: best?.companyName };
+    if (domain) {
+      const name = best?.companyName;
+      return name ? { domain, name } : { domain };
+    }
   }
 
   const web: any = await tool(client, "web_search", {
@@ -192,9 +195,14 @@ async function resolveCompanyDomain(
 
 // Run the company analysis.
 export async function runCompanyAnalysis(query: string): Promise<CompanyAnalysis> {
+  const mcpUrl = HG_MCP_URL;
+  if (!mcpUrl) {
+    throw new Error("HG_MCP_URL is not set");
+  }
+
   const client = new Client({ name: "hg-company-analysis", version: "0.1.0" });
-  const transport = new StreamableHTTPClientTransport(new URL(HG_MCP_URL));
-  await client.connect(transport);
+  const transport = new StreamableHTTPClientTransport(new URL(mcpUrl));
+  await client.connect(transport as any);
 
   const resolved = await resolveCompanyDomain(client, query);
   const companyDomain = resolved.domain;

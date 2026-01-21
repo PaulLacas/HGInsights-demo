@@ -4,19 +4,20 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 
 const HG_MCP_URL = process.env.HG_MCP_URL;
 
-if (!HG_MCP_URL) {
-  throw new Error("HG_MCP_URL is not set");
-}
-
 async function main() {
+  const mcpUrl = HG_MCP_URL;
+  if (!mcpUrl) {
+    throw new Error("HG_MCP_URL is not set");
+  }
+
   const client = new Client({
     name: "hg-prospect-research",
     version: "0.1.0",
   });
 
-  const transport = new StreamableHTTPClientTransport(new URL(HG_MCP_URL));
+  const transport = new StreamableHTTPClientTransport(new URL(mcpUrl));
 
-  await client.connect(transport);
+  await client.connect(transport as any);
 
   const tools = await client.listTools();
 
