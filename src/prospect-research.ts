@@ -83,13 +83,48 @@ function guessDomain(query: string) {
 // Pick the best company match.
 function pickCompany(companies: Company[], query: string) {
   const q = query.toLowerCase().trim();
-  return (
-    companies.find((c) => normalizeDomain(c.domain ?? "") === q) ||
-    companies.find((c) => (c.companyName ?? "").toLowerCase() === q) ||
-    companies.find((c) => (c.companyName ?? "").toLowerCase().includes(q)) ||
-    companies.find((c) => c.domain) ||
-    companies[0]
-  );
+  const slug = q.replace(/[^a-z0-9]+/g, "");
+  const tokens = q.split(/[^a-z0-9]+/g).filter((token) => token.length >= 3);
+  if (slug && !tokens.includes(slug)) tokens.unshift(slug);
+
+  function scoreCompany(c: Company) {
+    const name = (c.companyName ?? "").toLowerCase();
+    const domain = normalizeDomain(c.domain ?? "");
+    let score = 0;
+
+    if (domain === q) score = Math.max(score, 100);
+    if (slug) {
+      if (domain === `${slug}.com`) score = Math.max(score, 95);
+      else if (domain === `${slug}.io`) score = Math.max(score, 92);
+      else if (domain === `${slug}.co`) score = Math.max(score, 90);
+      else if (domain.startsWith(`${slug}.`)) score = Math.max(score, 88);
+      else if (domain.includes(slug)) score = Math.max(score, 80);
+    }
+
+    if (name === q) score = Math.max(score, 85);
+    else if (name.includes(q)) score = Math.max(score, 75);
+
+    for (const token of tokens) {
+      if (domain.includes(token)) score = Math.max(score, 70);
+      if (name.includes(token)) score = Math.max(score, 65);
+    }
+
+    return score;
+  }
+
+  let best: Company | undefined;
+  let bestScore = 0;
+
+  for (const company of companies) {
+    const score = scoreCompany(company);
+    if (score > bestScore) {
+      bestScore = score;
+      best = company;
+    }
+  }
+
+  if (!best || bestScore < 60) return undefined;
+  return best;
 }
 
 // Pick the most likely official domain.
@@ -176,9 +211,9 @@ async function resolveCompanyDomain(
 
   if (companies.length) {
     const best = pickCompany(companies, query);
-    const domain = best?.domain ? normalizeDomain(best.domain) : "";
-    if (domain) {
-      const name = best?.companyName;
+    if (best?.domain) {
+      const domain = normalizeDomain(best.domain);
+      const name = best.companyName;
       return name ? { domain, name } : { domain };
     }
   }
