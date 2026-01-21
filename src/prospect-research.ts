@@ -271,3 +271,4 @@ export async function runCompanyAnalysis(query: string): Promise<CompanyAnalysis
   }
 
   return analysis;
+}
