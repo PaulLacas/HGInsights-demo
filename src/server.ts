@@ -13,11 +13,11 @@ if (!Number.isFinite(PORT) || PORT <= 0) {
   throw new Error("PORT is not set");
 }
 
-function formatUsd(amount) {
+function formatUsd(amount: number): string {
   return "$" + amount.toFixed(6);
 }
 
-function logLLMCost(usage) {
+function logLLMCost(usage: any): void {
   if (!usage) {
     console.log("[LLM] Cost: N/A (missing usage data)");
     return;
@@ -77,7 +77,10 @@ function logLLMCost(usage) {
   );
 }
 
-async function callLLM(prompt) {
+async function callLLM(
+  prompt: string,
+): Promise<{ content?: string; error?: string }> {
+
   if (!LLM_API_URL || !LLM_API_KEY || !LLM_MODEL) {
     return { error: "LLM not configured. Set LLM_API_URL, LLM_API_KEY, and LLM_MODEL." };
   }
@@ -113,7 +116,12 @@ async function callLLM(prompt) {
   return { content };
 }
 
-async function generateBrief(compact, companyDomain, companyName) {
+async function generateBrief(
+  compact: unknown,
+  companyDomain: string,
+  companyName?: string,
+): Promise<any> {
+
   const prompt = `You will receive compact company data.
 Return STRICTLY valid JSON (no markdown, no extra text), with EXACTLY this structure:
 {
